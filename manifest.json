@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Meeting Mute",
+  "version": "1.0",
+  "description": "One global shortcut that mutes you inside Google Meet, Zoom, or Teams in the browser.",
+  "permissions": ["scripting", "notifications"],
+  "host_permissions": [
+    "https://meet.google.com/*",
+    "https://*.zoom.us/*",
+    "https://teams.microsoft.com/*",
+    "https://teams.live.com/*",
+    "https://teams.cloud.microsoft/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "icons": { "128": "icon.png" },
+  "action": { "default_title": "Meeting Mute (click to toggle)" },
+  "commands": {
+    "toggle-mute": {
+      "suggested_key": { "default": "Ctrl+Shift+9", "mac": "Command+Shift+9" },
+      "description": "Mute or unmute your meeting",
+      "global": true
+    }
+  }
+}
