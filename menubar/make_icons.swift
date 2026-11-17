@@ -4,7 +4,7 @@ import AppKit
 func hex(_ h: Int) -> NSColor { NSColor(srgbRed: CGFloat(h >> 16 & 255) / 255, green: CGFloat(h >> 8 & 255) / 255, blue: CGFloat(h & 255) / 255, alpha: 1) }
 try! FileManager.default.createDirectory(atPath: "icons", withIntermediateDirectories: true)
 // Styled like macOS's own camera-in-use indicator: a colored pill with a white symbol.
-for (name, symbol, color) in [("mic-live", "mic.fill", 0x34C759), ("mic-muted", "mic.slash.fill", 0xFF3B30)] {
+for (name, symbol, color) in [("mic-live", "mic.fill", 0x2ED259), ("mic-muted", "mic.slash.fill", 0xFF3B30)] {
     let size = NSSize(width: 42, height: 24)
     let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 84, pixelsHigh: 48, bitsPerSample: 8, samplesPerPixel: 4,
                                hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
