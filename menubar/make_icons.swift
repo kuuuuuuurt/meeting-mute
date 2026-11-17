@@ -5,15 +5,15 @@ func hex(_ h: Int) -> NSColor { NSColor(srgbRed: CGFloat(h >> 16 & 255) / 255, g
 try! FileManager.default.createDirectory(atPath: "icons", withIntermediateDirectories: true)
 // Styled like macOS's own camera-in-use indicator: a colored pill with a white symbol.
 for (name, symbol, color) in [("mic-live", "mic.fill", 0x34C759), ("mic-muted", "mic.slash.fill", 0xFF3B30)] {
-    let size = NSSize(width: 32, height: 22)
-    let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 64, pixelsHigh: 44, bitsPerSample: 8, samplesPerPixel: 4,
+    let size = NSSize(width: 42, height: 24)
+    let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 84, pixelsHigh: 48, bitsPerSample: 8, samplesPerPixel: 4,
                                hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
     rep.size = size
     NSGraphicsContext.saveGraphicsState()
     NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
     hex(color).setFill()
-    NSBezierPath(roundedRect: NSRect(x: 1, y: 2, width: 30, height: 18), xRadius: 9, yRadius: 9).fill()
-    let cfg = NSImage.SymbolConfiguration(pointSize: 11, weight: .semibold).applying(.init(paletteColors: [.white]))
+    NSBezierPath(roundedRect: NSRect(x: 1, y: 0, width: 40, height: 24), xRadius: 12, yRadius: 12).fill()
+    let cfg = NSImage.SymbolConfiguration(pointSize: 13, weight: .semibold).applying(.init(paletteColors: [.white]))
     let sym = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)!.withSymbolConfiguration(cfg)!
     let s = sym.size
     sym.draw(in: NSRect(x: (size.width - s.width) / 2, y: (size.height - s.height) / 2, width: s.width, height: s.height))
