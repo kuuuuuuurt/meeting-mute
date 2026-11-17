@@ -43,7 +43,7 @@ Other keyboard tools that can remap a key to a key combination (Karabiner-Elemen
 
 ## Optional: mute status in the menu bar
 
-If you use [SwiftBar](https://swiftbar.app), the extension can show your mute state in the Mac menu bar: a red **MUTED** with a crossed-out mic while you're muted, a green **LIVE** while your mic is on, and nothing when you're not in a meeting. It follows the meeting itself, so it stays right whether you mute with the shortcut or by clicking in the page.
+If you use [SwiftBar](https://swiftbar.app), the extension can show your mute state in the Mac menu bar: a red crossed-out mic while you're muted, a green mic while your mic is on, and nothing when you're not in a meeting. It follows the meeting itself, so it stays right whether you mute with the shortcut or by clicking in the page.
 
 Chrome extensions can't talk to the menu bar directly, so this uses a small helper script that Chrome runs (Chrome calls this "native messaging"). The extension tells the helper your mic state, the helper saves it to a file, and the SwiftBar plugin reads that file.
 

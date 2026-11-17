@@ -21,11 +21,11 @@ except (OSError, ValueError):
 state = data.get("state") if time.time() - data.get("t", 0) < STALE_AFTER else "none"
 
 if state == "muted":
-    print("MUTED | sfimage=mic.slash.fill sfcolor=#FF3B30 color=#FF3B30")
+    print("| sfimage=mic.slash.fill sfcolor=#FF3B30")
     print("---")
     print("You're muted in your meeting")
 elif state == "live":
-    print("LIVE | sfimage=mic.fill sfcolor=#34C759 color=#34C759")
+    print("| sfimage=mic.fill sfcolor=#34C759")
     print("---")
     print("Your mic is on in your meeting")
 # No meeting: print nothing, and SwiftBar hides the item.
