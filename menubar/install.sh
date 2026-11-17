@@ -10,13 +10,19 @@ fi
 HERE="$(cd "$(dirname "$0")" && pwd)"
 chmod +x "$HERE/host.py" "$HERE/meeting-mute.15s.py"
 
+# Chrome can't run scripts inside protected folders like Documents or Desktop, so the helper gets copied out.
+HELPER_DIR="$HOME/Library/Application Support/meeting-mute"
+mkdir -p "$HELPER_DIR"
+cp "$HERE/host.py" "$HELPER_DIR/host.py"
+chmod +x "$HELPER_DIR/host.py"
+
 HOSTS_DIR="$HOME/Library/Application Support/Google/Chrome/NativeMessagingHosts"
 mkdir -p "$HOSTS_DIR"
 cat > "$HOSTS_DIR/com.meetingmute.state.json" <<JSON
 {
   "name": "com.meetingmute.state",
   "description": "Meeting Mute menu bar indicator",
-  "path": "$HERE/host.py",
+  "path": "$HELPER_DIR/host.py",
   "type": "stdio",
   "allowed_origins": ["chrome-extension://$EXT_ID/"]
 }
