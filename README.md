@@ -41,6 +41,19 @@ If you have a Logitech keyboard, you can make any spare key send the shortcut th
 
 Other keyboard tools that can remap a key to a key combination (Karabiner-Elements, BetterTouchTool, and so on) work the same way.
 
+## Optional: mute status in the menu bar
+
+If you use [SwiftBar](https://swiftbar.app), the extension can show your mute state in the Mac menu bar: a red **MUTED** with a crossed-out mic while you're muted, a green **LIVE** while your mic is on, and nothing when you're not in a meeting. It follows the meeting itself, so it stays right whether you mute with the shortcut or by clicking in the page.
+
+Chrome extensions can't talk to the menu bar directly, so this uses a small helper script that Chrome runs (Chrome calls this "native messaging"). The extension tells the helper your mic state, the helper saves it to a file, and the SwiftBar plugin reads that file.
+
+1. Install SwiftBar (`brew install --cask swiftbar`) and choose a plugin folder when it asks.
+2. Copy the extension's ID from the Meeting Mute card in `chrome://extensions`.
+3. Run `menubar/install.sh <extension-id>`. It registers the helper with Chrome and adds the plugin to your SwiftBar folder.
+4. Reload Meeting Mute in `chrome://extensions`, then reload your meeting tab.
+
+Don't move the folder after installing; the helper is registered by its location. If you move it, run the installer again.
+
 ## Supported sites
 
 - Google Meet (`meet.google.com`)

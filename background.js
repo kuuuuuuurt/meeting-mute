@@ -20,10 +20,9 @@ async function toggleMute() {
 
   for (const tab of tabs) {
     try {
-      const results = await chrome.scripting.executeScript({
-        target: { tabId: tab.id, allFrames: true },
-        func: clickMuteButton,
-      });
+      const target = { tabId: tab.id, allFrames: true };
+      await chrome.scripting.executeScript({ target, files: ["find.js"] });
+      const results = await chrome.scripting.executeScript({ target, func: clickMuteButton });
       const hit = results.find((r) => r.result);
       if (hit) {
         showBadge(hit.result);
@@ -48,29 +47,10 @@ function score(tab) {
   return (tab.audible ? 2 : 0) + (tab.active ? 1 : 0);
 }
 
-// Runs inside the meeting page. Must be self-contained.
+// Runs inside the meeting page, after find.js.
 function clickMuteButton() {
-  const selectors = [
-    '[data-is-muted][aria-label*="microphone" i]', // Google Meet
-    "#microphone-button",                          // Teams
-    '[data-tid="toggle-mute"]',                    // Teams (older)
-    'button[aria-label*="mute my microphone" i]',  // Zoom web client
-  ];
-  const labelPattern = /turn (on|off) microphone|\b(un)?mute (my )?(mic|microphone)\b/i;
-  const usable = (el) => el.getClientRects().length > 0 && !el.disabled;
-
-  let btn = null;
-  for (const s of selectors) {
-    btn = [...document.querySelectorAll(s)].find(usable);
-    if (btn) break;
-  }
-  if (!btn) {
-    btn = [...document.querySelectorAll('button, [role="button"]')].find(
-      (el) => usable(el) && labelPattern.test(el.getAttribute("aria-label") || "")
-    );
-  }
+  const btn = findMuteButton();
   if (!btn) return null;
-
   const labelBeforeClick = btn.getAttribute("aria-label") || "clicked";
   btn.click();
   return labelBeforeClick;
@@ -82,4 +62,37 @@ function showBadge(labelBeforeClick) {
   chrome.action.setBadgeBackgroundColor({ color: nowMuted ? "#d93025" : "#188038" });
   chrome.action.setBadgeText({ text: nowMuted ? "MUTE" : "LIVE" });
   setTimeout(() => chrome.action.setBadgeText({ text: "" }), 2500);
+}
+
+// ---- Optional menu bar indicator (see menubar/README) ----
+// Each meeting page reports its mic state; the combined state goes to a small native helper,
+// which writes it where the SwiftBar plugin reads it. If the helper isn't installed, this does nothing.
+
+const frameStates = new Map(); // "tabId:frameId" -> { state, t }
+let lastSentState = null;
+
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg.type !== "mic-state" || !sender.tab) return;
+  frameStates.set(`${sender.tab.id}:${sender.frameId}`, { state: msg.state, t: Date.now() });
+  report(msg.state !== "none");
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  for (const key of frameStates.keys()) if (key.startsWith(`${tabId}:`)) frameStates.delete(key);
+  report(false);
+});
+
+// Live wins over muted: showing "muted" while you're actually live is the dangerous mistake.
+function combinedState() {
+  const fresh = [...frameStates.values()].filter((s) => Date.now() - s.t < 30000).map((s) => s.state);
+  if (fresh.includes("live")) return "live";
+  if (fresh.includes("muted")) return "muted";
+  return "none";
+}
+
+function report(isHeartbeat) {
+  const state = combinedState();
+  if (state === lastSentState && !isHeartbeat) return;
+  lastSentState = state;
+  chrome.runtime.sendNativeMessage("com.meetingmute.state", { state }).catch(() => {});
 }
