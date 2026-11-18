@@ -27,7 +27,9 @@ def icon(name):
         return "image=" + base64.b64encode(f.read()).decode()
 
 
-state = data.get("state") if time.time() - data.get("t", 0) < STALE_AFTER else "none"
+# One entry per Chrome profile. Live wins: showing "muted" while you're actually live is the dangerous mistake.
+fresh = [p["state"] for p in data.get("profiles", {}).values() if time.time() - p["t"] < STALE_AFTER]
+state = "live" if "live" in fresh else "muted" if "muted" in fresh else "none"
 
 if state == "muted":
     print("| " + icon("mic-muted"))

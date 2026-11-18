@@ -13,7 +13,8 @@ chrome.commands.onCommand.addListener((command) => {
 });
 chrome.action.onClicked.addListener(() => toggleMute());
 
-async function toggleMute() {
+// relayed = the request came from this extension in another Chrome profile (see connectHelper below).
+async function toggleMute(relayed = false) {
   const tabs = await chrome.tabs.query({ url: MEETING_URLS });
   // A tab in a live call is usually playing audio; try those first, then the active tab.
   tabs.sort((a, b) => score(b) - score(a));
@@ -31,6 +32,13 @@ async function toggleMute() {
     } catch (e) {
       // Tab can't be scripted (still loading, crashed); try the next one.
     }
+  }
+
+  if (relayed) return;
+  // Chrome gives a global shortcut to only one profile. If the meeting is in another profile, hand it over.
+  if (helper) {
+    helper.postMessage({ type: "relay-toggle" });
+    return;
   }
 
   chrome.notifications.create({
@@ -64,9 +72,25 @@ function showBadge(labelBeforeClick) {
   setTimeout(() => chrome.action.setBadgeText({ text: "" }), 2500);
 }
 
-// ---- Optional menu bar indicator (see menubar/README) ----
+// ---- Optional helper (menubar/): menu bar indicator + shortcut relay between Chrome profiles ----
 // Each meeting page reports its mic state; the combined state goes to a small native helper,
-// which writes it where the SwiftBar plugin reads it. If the helper isn't installed, this does nothing.
+// which writes it where the SwiftBar plugin reads it. The same connection relays the shortcut
+// between profiles. If the helper isn't installed, all of this does nothing.
+
+let helper = null;
+
+function connectHelper() {
+  helper = chrome.runtime.connectNative("com.meetingmute.state");
+  helper.onMessage.addListener((msg) => {
+    if (msg.type === "toggle") toggleMute(true);
+  });
+  helper.onDisconnect.addListener(() => {
+    const notInstalled = /not found/i.test(chrome.runtime.lastError?.message || "");
+    helper = null;
+    if (!notInstalled) setTimeout(connectHelper, 5000);
+  });
+  lastSentState = null; // resend state to a fresh helper
+}
 
 const frameStates = new Map(); // "tabId:frameId" -> { state, t }
 let lastSentState = null;
@@ -94,5 +118,7 @@ function report(isHeartbeat) {
   const state = combinedState();
   if (state === lastSentState && !isHeartbeat) return;
   lastSentState = state;
-  chrome.runtime.sendNativeMessage("com.meetingmute.state", { state }).catch(() => {});
+  helper?.postMessage({ type: "state", state });
 }
+
+connectHelper();

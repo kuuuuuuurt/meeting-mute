@@ -54,6 +54,10 @@ Chrome extensions can't talk to the menu bar directly, so this uses a small help
 
 Don't move the folder after installing; the helper is registered by its location. If you move it, run the installer again.
 
+## Several Chrome profiles
+
+If you use more than one Chrome profile (say, personal and work windows), install the extension in each one. Chrome gives a Global shortcut to only one profile, so on its own the shortcut only works for meetings in that profile. With the helper above installed, the profile that gets the shortcut passes it to the others when it has no meeting open, so one key works wherever your call is. The installer covers every profile; the extension ID is the same in each as long as they all load the same folder.
+
 ## Supported sites
 
 - Google Meet (`meet.google.com`)
